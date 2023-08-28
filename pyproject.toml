@@ -1,0 +1,22 @@
+[project]
+name = "dart_scraper"
+version = "0.0.1"
+authors = [
+  { name="habibi", email="jnh03336@gmail.com" },
+]
+description = "scrape data of south korea company's financial statement"
+readme = "README.md"
+requires-python = ">=3.6"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/pypa/sampleproject"
+"Bug Tracker" = "https://github.com/pypa/sampleproject/issues"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
