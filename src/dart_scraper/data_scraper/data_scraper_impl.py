@@ -44,9 +44,11 @@ class DataScraperImpl(DataScraper):
         return self._get_index_num("재무상태표", ["부채총계"])
     
     def retreive_cash(self):
-        return self._get_index_num("현금흐름표", ["기말의현금및현금성자산", "분기말현금및현금성자산", "기말현금및현금성자산", "분기말의현금및현금성자산", "반기말현금및현금성자산", "반기말의현금및현금성자산", "기말의현금", "당기말현금및현금성자산", "당기말의현금및현금성자산", "당반기말의현금및현금성자산", "기말현금", "분기말재무상태표상현금및현금성자산", "분기(당기)말의현금및현금성자산", "분기말의현금", "반기말의현금", "기말현금및예치금", "현금및현금성자산(기말)", "당기(분기)말현금및현금성자산"])
+        return self._get_index_num("현금흐름표", ["기말의현금및현금성자산", "분기말현금및현금성자산", "기말현금및현금성자산", "분기말의현금및현금성자산", "반기말현금및현금성자산", "반기말의현금및현금성자산", "기말의현금", "당기말현금및현금성자산", "당기말의현금및현금성자산", "당반기말의현금및현금성자산", "기말현금", "분기말재무상태표상현금및현금성자산", "분기(당기)말의현금및현금성자산", "분기말의현금", "반기말의현금", "기말현금및예치금", "현금및현금성자산(기말)", "당기(분기)말현금및현금성자산", "당(분)기말의현금및현금성자산"])
 
     def _get_index_num(self, table_name, index_names):
+        if self.tables[table_name].main_table is None:
+            return None
         cell_offset = DataScraperImpl._get_cell_offset(self.tables[table_name].main_table)
         rows = self.tables[table_name].main_table.tbody.find_all(recursive=False)
         for row in rows:
@@ -60,7 +62,7 @@ class DataScraperImpl(DataScraper):
                 row_name = row_name.split("(손실)")[0].strip()
             if '(매출액)' in row_name:
                 row_name = row_name.split("(매출액)")[0].strip()
-            if row_name in index_names:
+            if re.sub(r'[\[\]]', '', row_name)in index_names:
                 if self.is_3month_data() and table_name == '손익계산서':
                     count = 0
                     for i in range(1, len(cells) - cell_offset):
@@ -141,29 +143,36 @@ class DataScraperImpl(DataScraper):
         return parsed_table
     
     def _classify_sections(summary, sections):
-        for section in sections:
-            flag = None
+        for i in range(len(sections)):
+            section = sections[i]
+            flag = '재무상태표' if i == 0 else None 
             for elem in section:
                 elem_text = ''.join([c.strip() for c in elem.getText()])
+                if sum(['재무상태표' in elem_text, '손익계산서' in elem_text, '현금흐름표' in elem_text]) >= 2:
+                    continue
                 if not summary['재무상태표'].main_table and '재무상태표' in elem_text:
                     flag = '재무상태표'
-                if not summary['손익계산서'].main_table and '손익계산서' in elem_text:
+                if not summary['손익계산서'].main_table and '손익계산' in elem_text:
                     flag = '손익계산서'
                 if not summary['현금흐름표'].main_table and '현금흐름표' in elem_text:
                     flag = '현금흐름표'
                 if not flag:
                     continue
-                if (elem.name == 'table' and (len(summary[flag].extra_elems) == 0 or len(elem.tbody.find_all(recursive=False)) <= 5)) or DataScraperImpl._is_meta_table(elem) or elem.name != 'table':
-                    summary[flag].extra_elems.append(elem)
+                if DataScraperImpl._is_meta_table(elem) and len(elem.find_all(lambda tag: tag.name == 'table', recursive=True)) > 0:
+                    elem = elem.find_all(lambda tag: tag.name == 'table', recursive=True)[0]
+                if (elem.name == 'table' and (len(summary[flag].extra_elems) == 0)) \
+                    or DataScraperImpl._is_meta_table(elem) \
+                    or elem.name != 'table':
+                        summary[flag].extra_elems.append(elem)
                 elif not summary[flag].main_table and DataScraperImpl._is_main_table(elem):
                     summary[flag].main_table = elem
         return summary
 
     def _is_meta_table(elem):
-        return elem.name == 'table' and elem.has_attr('class') and 'nb' in elem['class']
+        return elem.name == 'table' and ((elem.has_attr('class') and 'nb' in elem['class']) or (len(elem.tbody.find_all(recursive=False)) <= 8))
 
     def _is_main_table(elem):
-        return elem.name == 'table' and len(elem.tbody.find_all(recursive=False)) > 5
+        return (elem.name == 'table' and len(elem.tbody.find_all(recursive=False)) > 8) 
 
     def _parse_unit(summary):
         for key in DataScraperImpl.finance_names:

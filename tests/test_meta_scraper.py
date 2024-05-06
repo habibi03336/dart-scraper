@@ -52,3 +52,13 @@ class TestMetaScraper:
         # compare
         assert elem_id == '4'
 
+    def test_makeToc_function(self):
+        # Meta scraping 시 tree 데이터를 가져오는 js함수가 조금 다른 경우가 생김
+        # 원래 initPage 함수에 tree data 생성 로직이 있었는데 이것이 , makeToc 함수로 분리되었음(최근 없데이트로 변경된 듯)
+        rcp_no = "20230811002478"
+        html = fetch_cover(rcp_no)
+
+        scraper = MetaScraper(html)
+
+        assert scraper.dcm_no() == '9385765'
+        assert scraper.elem_id('연결재무제표') == '19'
