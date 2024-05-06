@@ -45,23 +45,43 @@ class MetaScraperImpl(MetaScraper):
         script = html.head.findAll(lambda tag: tag.name =='script')
         target_script = script[-1]
         script_text = target_script.text
-        target_function_name = 'function initPage() '
-        script_text = script_text[script_text.find(target_function_name):]
-        script_text = script_text[len(target_function_name)+1:]
+        target_function_name = 'function initPage() ' if script_text.find('function makeToc() ') == -1  else 'function makeToc() '
+        if target_function_name == 'function initPage() ':
+            script_text = script_text[script_text.find(target_function_name):]
+            script_text = script_text[len(target_function_name)+1:]
 
-        stack_len = 1
-        i = 0
-        while stack_len != 0 and i < len(script_text):
-            if script_text[i] == '{':
-                stack_len += 1
-            if script_text[i] == '}':
-                stack_len -= 1
-            i += 1
+            stack_len = 1
+            i = 0
+            while stack_len != 0 and i < len(script_text):
+                if script_text[i] == '{':
+                    stack_len += 1
+                if script_text[i] == '}':
+                    stack_len -= 1
+                i += 1
 
-        target_function_content = script_text[:i-1]
-        target_function_content = target_function_content.split("initLayerNew('winCorpInfo');")[1]
-        target_function_content = target_function_content.split("//js tree")[0]
-        target_function_total = "function f(){" + target_function_content + "\n\t\t\treturn treeData; \n}" 
-        with pyjs_lock:
-            target_function = js2py.eval_js(target_function_total)
-        return target_function()
+            target_function_content = script_text[:i-1]
+            target_function_content = target_function_content.split("initLayerNew('winCorpInfo');")[1]
+            target_function_content = target_function_content.split("//js tree")[0]
+            target_function_total = "function f(){" + target_function_content + "\n\t\t\treturn treeData; \n}" 
+            with pyjs_lock:
+                target_function = js2py.eval_js(target_function_total)
+            return target_function()
+        else:
+            script_text = script_text[script_text.find(target_function_name):]
+            script_text = script_text[len(target_function_name)+1:]
+
+            stack_len = 1
+            i = 0
+            while stack_len != 0 and i < len(script_text):
+                if script_text[i] == '{':
+                    stack_len += 1
+                if script_text[i] == '}':
+                    stack_len -= 1
+                i += 1
+
+            target_function_content = script_text[:i-1]
+            target_function_content = target_function_content.split("//js tree")[0]
+            target_function_total = "function f(){" + target_function_content + "\n\t\t\treturn treeData; \n}" 
+            with pyjs_lock:
+                target_function = js2py.eval_js(target_function_total)
+            return target_function()
