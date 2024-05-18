@@ -71,7 +71,7 @@ class DataScraperImpl(DataScraper):
                             count += 1
                         if count == 2:
                             return DataScraperImpl._parse_cell_num(cells[i + cell_offset]) * DataScraperImpl.unit_map[self.tables[table_name].unit]
-                if cells[1+cell_offset].text.strip() and cells[1+cell_offset].text.strip() != "-":
+                if 1+cell_offset < len(cells) and cells[1+cell_offset].text.strip() and cells[1+cell_offset].text.strip() != "-":
                     return DataScraperImpl._parse_cell_num(cells[1+cell_offset]) * DataScraperImpl.unit_map[self.tables[table_name].unit]
                 elif 2+cell_offset < len(cells) and cells[2+cell_offset].text.strip() and cells[2+cell_offset].text.strip() != "-":
                     return DataScraperImpl._parse_cell_num(cells[2+cell_offset]) * DataScraperImpl.unit_map[self.tables[table_name].unit]
@@ -91,7 +91,9 @@ class DataScraperImpl(DataScraper):
         return 0
 
     def _parse_cell_num(cell_num):
-        c = cell_num.text.replace(",","").strip()
+        c = cell_num.text.replace(",","").replace("=", "").strip()
+        if c[:3] == "(-)":
+            return -int(c[3:])
         if c[0] == "(" :
             return -int(c[1:-1])
         if c[0] == "△" :
@@ -152,7 +154,7 @@ class DataScraperImpl(DataScraper):
                     continue
                 if not summary['재무상태표'].main_table and '재무상태표' in elem_text:
                     flag = '재무상태표'
-                if not summary['손익계산서'].main_table and '손익계산' in elem_text:
+                if not summary['손익계산서'].main_table and ('손익계산' in elem_text or '손익포괄계산' in elem_text or '손익상태' in elem_text):
                     flag = '손익계산서'
                 if not summary['현금흐름표'].main_table and '현금흐름표' in elem_text:
                     flag = '현금흐름표'

@@ -137,6 +137,120 @@ class TestDataScraper2:
         assert data_scraper.retreive_debt() == 23_373_363_314
         assert data_scraper.retreive_cash() == 2_203_143_077
 
+    def test_실패케이스_2024_05_18(self):
+        url = 'https://dart.fss.or.kr/report/viewer.do?rcpNo=20160329000448&dcmNo=5007089&eleId=15&offset=788145&length=46657&dtd=dart3.xsd'
+        rcp_no, dcm_no, elem_id = retrieve_meta(url)
+        html = fetch_content(rcp_no, elem_id, dcm_no)
+        data_scraper = DataScraper(html)
+
+        assert data_scraper.retreive_currency() == "KRW"
+        assert data_scraper.retreive_period_standard() == '2015-4'
+        assert data_scraper.retreive_period_length() == 12
+        assert data_scraper.retreive_sales() == 2_084_219_000_000
+        assert data_scraper.retreive_operating_profit() == -182_673_000_000
+        assert data_scraper.retreive_net_profit() == -724_554_000_000
+        assert data_scraper.retreive_equity() == -3_024_280_000_000
+        assert data_scraper.retreive_debt() == 5_455_552_000_000
+        assert data_scraper.retreive_cash() == 67_561_000_000
+
+    def test_실패케이스_2024_05_18_2(self):
+        url = 'https://dart.fss.or.kr/report/viewer.do?rcpNo=20181112000128&dcmNo=6376322&eleId=15&offset=123711&length=59084&dtd=dart3.xsd'
+        rcp_no, dcm_no, elem_id = retrieve_meta(url)
+        html = fetch_content(rcp_no, elem_id, dcm_no)
+        data_scraper = DataScraper(html)
+
+        assert data_scraper.retreive_currency() == "KRW"
+        assert data_scraper.retreive_period_standard() == '2018-3'
+        assert data_scraper.retreive_period_length() == 9
+        assert data_scraper.retreive_sales() == 6_341_557_449
+        assert data_scraper.retreive_operating_profit() == -232_749_239
+        assert data_scraper.retreive_net_profit() == 465_711_419
+        assert data_scraper.retreive_equity() == 18_422_794_412
+        assert data_scraper.retreive_debt() == 12_711_387_813
+        assert data_scraper.retreive_cash() == 1_490_091_837
+
+
+    def test_실패케이스_2024_05_18_body안에_바로_테이블이없는경우_한번더싸여있음(self):  #이케이스는 일단 놔둠
+        url = 'https://dart.fss.or.kr/report/viewer.do?rcpNo=20210817001064&dcmNo=8179900&eleId=21&offset=308565&length=33690&dtd=dart3.xsd'
+        rcp_no, dcm_no, elem_id = retrieve_meta(url)
+        html = fetch_content(rcp_no, elem_id, dcm_no)
+        data_scraper = DataScraper(html)
+
+        assert data_scraper.retreive_currency() == "KRW"
+        assert data_scraper.retreive_period_standard() == '2021-2'
+        assert data_scraper.retreive_period_length() == 9
+        assert data_scraper.retreive_sales() == 23_981_662_874
+        assert data_scraper.retreive_operating_profit() == 136_745_038
+        assert data_scraper.retreive_net_profit() == 764_264_608
+        assert data_scraper.retreive_equity() == 41_791_124_257
+        assert data_scraper.retreive_debt() == 12_715_952_581
+        assert data_scraper.retreive_cash() == 5_140_212_308
+
+    def test_실패케이스_2024_05_18_손익계산서가아닌_손익상태표(self): 
+        url = 'https://dart.fss.or.kr/report/viewer.do?rcpNo=20220816001468&dcmNo=8771611&eleId=21&offset=153075&length=60778&dtd=dart3.xsd'
+        rcp_no, dcm_no, elem_id = retrieve_meta(url)
+        html = fetch_content(rcp_no, elem_id, dcm_no)
+        data_scraper = DataScraper(html)
+
+        assert data_scraper.retreive_currency() == "KRW"
+        assert data_scraper.retreive_period_standard() == '2022-2'
+        assert data_scraper.retreive_period_length() == 6
+        assert data_scraper.retreive_sales() == 14_234_660_791
+        assert data_scraper.retreive_operating_profit() == -197_924_508
+        assert data_scraper.retreive_net_profit() == -5_221_781_090
+        assert data_scraper.retreive_equity() == 45_420_937_381
+        assert data_scraper.retreive_debt() == 19_157_411_484
+        assert data_scraper.retreive_cash() == 179_853_137
+
+    def test_실패케이스_2024_05_18_포괄손익계산서가아닌_손익포괄계산서(self):
+        url = 'https://dart.fss.or.kr/report/viewer.do?rcpNo=20200814001104&dcmNo=7443863&eleId=15&offset=388300&length=50225&dtd=dart3.xsd'
+        rcp_no, dcm_no, elem_id = retrieve_meta(url)
+        html = fetch_content(rcp_no, elem_id, dcm_no)
+        data_scraper = DataScraper(html)
+
+        assert data_scraper.retreive_currency() == "KRW"
+        assert data_scraper.retreive_period_standard() == '2020-2'
+        assert data_scraper.retreive_period_length() == 6
+        assert data_scraper.retreive_sales() == 4_655_902_092
+        assert data_scraper.retreive_operating_profit() == 1_342_818_840
+        assert data_scraper.retreive_net_profit() == 203_730_562
+        assert data_scraper.retreive_equity() == 26_635_062_918
+        assert data_scraper.retreive_debt() == 14_897_929_920
+        assert data_scraper.retreive_cash() == 4_283_938_602
+
+    def test_실패케이스_2024_05_18_숫자쪽에_필요없는기호(self):
+        url = 'https://dart.fss.or.kr/report/viewer.do?rcpNo=20170331003708&dcmNo=5536290&eleId=15&offset=141341&length=35852&dtd=dart3.xsd'
+        rcp_no, dcm_no, elem_id = retrieve_meta(url)
+        html = fetch_content(rcp_no, elem_id, dcm_no)
+        data_scraper = DataScraper(html)
+
+        assert data_scraper.retreive_currency() == "KRW"
+        assert data_scraper.retreive_period_standard() == '2016-4'
+        assert data_scraper.retreive_period_length() == 12
+        assert data_scraper.retreive_sales() == 1_009_261_866_832
+        assert data_scraper.retreive_operating_profit() == -6_310_385_474
+        assert data_scraper.retreive_net_profit() == -5_535_814_070
+        assert data_scraper.retreive_equity() == 106_582_824_901
+        assert data_scraper.retreive_debt() == 329_605_297_363
+        assert data_scraper.retreive_cash() == 10_343_994_850
+
+    def test_실패케이스_2024_05_18_3(self):
+        url = 'https://dart.fss.or.kr/report/viewer.do?rcpNo=20180515000394&dcmNo=6177314&eleId=15&offset=125487&length=60853&dtd=dart3.xsd'
+        rcp_no, dcm_no, elem_id = retrieve_meta(url)
+        html = fetch_content(rcp_no, elem_id, dcm_no)
+        data_scraper = DataScraper(html)
+
+        assert data_scraper.retreive_currency() == "KRW"
+        assert data_scraper.retreive_period_standard() == '2018-1'
+        assert data_scraper.retreive_period_length() == 3
+        assert data_scraper.retreive_sales() == 2_301_113_898
+        assert data_scraper.retreive_operating_profit() == -64_656_102
+        assert data_scraper.retreive_net_profit() == 108_720_879
+        assert data_scraper.retreive_equity() == 18_065_803_872
+        assert data_scraper.retreive_debt() == 13_427_713_329
+        assert data_scraper.retreive_cash() == 1_502_302_242
+
+
 
 
 
