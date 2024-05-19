@@ -160,6 +160,8 @@ class DataScraperImpl(DataScraper):
                     flag = '현금흐름표'
                 if not flag:
                     continue
+                if summary[flag].main_table != None:
+                    continue
                 if DataScraperImpl._is_meta_table(elem) and len(elem.find_all(lambda tag: tag.name == 'table', recursive=True)) > 0:
                     elem = elem.find_all(lambda tag: tag.name == 'table', recursive=True)[0]
                 if (elem.name == 'table' and (len(summary[flag].extra_elems) == 0)) \
